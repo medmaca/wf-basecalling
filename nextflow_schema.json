@@ -14,11 +14,10 @@
       "properties": {
         "input": {
           "type": "string",
-          "format": "file-path",
+          "format": "path",
           "exists": true,
           "schema": "assets/schema_input.json",
           "mimetype": "text/csv",
-          "pattern": "^\\S+\\.csv$",
           "description": "Directory containing FAST5 (or POD5) signal for basecalling.",
           "help_text": "This directory will be searched recursively. All FAST5 or POD5 files (depending on which extension you select in the Basecalling Options) in this directory or any subdirectory (no matter how deep) will be basecalled.",
           "fa_icon": "fas fa-file-csv"
@@ -203,7 +202,8 @@
             "dna_r10.4.1_e8.2_260bps_trns@v5.0.alpha",
             "dna_r10.4.1_e8.2_400bps_5b4_dU_trns@v5.0.alpha",
             "dna_r10.4.1_e8.2_400bps_trns@v5.0.alpha"
-          ]
+          ],
+          "default": "dna_r10.4.1_e8.2_400bps_trns@v5.0.alpha"
         }
       }
     },
