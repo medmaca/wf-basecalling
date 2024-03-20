@@ -1,0 +1,298 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://raw.githubusercontent.com/epi2me-labs/wf-basecalling/master/nextflow_schema.json",
+  "title": "epi2me-labs/wf-basecalling pipeline parameters",
+  "description": "Helper workflow for basecalling ONT reads.",
+  "type": "object",
+  "definitions": {
+    "input_output_options": {
+      "title": "Input/output options",
+      "type": "object",
+      "fa_icon": "fas fa-terminal",
+      "description": "Define where the pipeline should find input data and save output data.",
+      "required": ["input"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "format": "file-path",
+          "exists": true,
+          "schema": "assets/schema_input.json",
+          "mimetype": "text/csv",
+          "pattern": "^\\S+\\.csv$",
+          "description": "Directory containing FAST5 (or POD5) signal for basecalling.",
+          "help_text": "Directory containing FAST5 (or POD5) signal for basecalling.",
+          "fa_icon": "fas fa-file-csv"
+        },
+        "ref": {
+          "type": "string",
+          "help_text": "Optional reference FASTA file to align basecalled reads to.",
+          "description": "Optional reference FASTA file to align basecalled reads to."
+        }
+      }
+    },
+    "output_options": {
+      "title": "Output options",
+      "type": "object",
+      "description": "",
+      "default": "",
+      "properties": {
+        "out_dir": {
+          "type": "string",
+          "default": "output"
+        },
+        "sample_name": {
+          "type": "string",
+          "default": "SAMPLE"
+        },
+        "fastq_only": {
+          "type": "boolean"
+        },
+        "output_bam": {
+          "type": "boolean"
+        }
+      }
+    },
+    "max_job_request_options": {
+      "title": "Max job request options",
+      "type": "object",
+      "fa_icon": "fab fa-acquisitions-incorporated",
+      "description": "Set the top limit for requested resources for any single job.",
+      "help_text": "If you are running on a smaller system, a pipeline step requesting more resources than are available may cause the Nextflow to stop the run with an error. These options allow you to cap the maximum resources requested by any single job so that the pipeline will run on your system.\n\nNote that you can not _increase_ the resources requested by any job using these options. For that you will need your own configuration file. See [the nf-core website](https://nf-co.re/usage/configuration) for details.",
+      "properties": {
+        "max_cpus": {
+          "type": "integer",
+          "description": "Maximum number of CPUs that can be requested for any single job.",
+          "default": 32,
+          "fa_icon": "fas fa-microchip",
+          "hidden": true,
+          "help_text": "Use to set an upper-limit for the CPU requirement for each process. Should be an integer e.g. `--max_cpus 1`"
+        },
+        "max_memory": {
+          "type": "string",
+          "description": "Maximum amount of memory that can be requested for any single job.",
+          "default": "256.GB",
+          "fa_icon": "fas fa-memory",
+          "pattern": "^\\d+(\\.\\d+)?\\.?\\s*(K|M|G|T)?B$",
+          "hidden": true,
+          "help_text": "Use to set an upper-limit for the memory requirement for each process. Should be a string in the format integer-unit e.g. `--max_memory '8.GB'`"
+        },
+        "max_time": {
+          "type": "string",
+          "description": "Maximum amount of time that can be requested for any single job.",
+          "default": "48.h",
+          "fa_icon": "far fa-clock",
+          "pattern": "^(\\d+\\.?\\s*(s|m|h|d|day)\\s*)+$",
+          "hidden": true,
+          "help_text": "Use to set an upper-limit for the time requirement for each process. Should be a string in the format integer-unit e.g. `--max_time '2.h'`"
+        }
+      }
+    },
+    "generic_options": {
+      "title": "Generic options",
+      "type": "object",
+      "fa_icon": "fas fa-file-import",
+      "description": "Less common options for the pipeline, typically set in a config file.",
+      "help_text": "These options are common to all nf-core pipelines and allow you to customise some of the core preferences for how the pipeline runs.\n\nTypically these options would be set in a Nextflow config file loaded for all pipeline runs, such as `~/.nextflow/config`.",
+      "properties": {
+        "help": {
+          "type": "boolean",
+          "description": "Display help text.",
+          "fa_icon": "fas fa-question-circle",
+          "hidden": true
+        },
+        "version": {
+          "type": "boolean",
+          "description": "Display version and exit.",
+          "fa_icon": "fas fa-question-circle",
+          "hidden": true
+        },
+        "validate_params": {
+          "type": "boolean",
+          "description": "Boolean whether to validate parameters against the schema at runtime",
+          "default": true,
+          "fa_icon": "fas fa-check-square",
+          "hidden": true
+        },
+        "disable_ping": {
+          "type": "boolean"
+        }
+      }
+    },
+    "basecalling_options": {
+      "title": "Basecalling options",
+      "type": "object",
+      "description": "",
+      "default": "",
+      "properties": {
+        "basecaller_cfg": {
+          "type": "string"
+        },
+        "duplex": {
+          "type": "boolean"
+        },
+        "remora_cfg": {
+          "type": "string"
+        },
+        "dorado_ext": {
+          "type": "string",
+          "default": "pod5"
+        }
+      }
+    },
+    "advanced_basecalling_options": {
+      "title": "Advanced basecalling options",
+      "type": "object",
+      "description": "",
+      "default": "",
+      "properties": {
+        "output_pod5": {
+          "type": "boolean"
+        },
+        "qscore_filter": {
+          "type": "integer",
+          "default": 10
+        },
+        "basecaller_chunk_size": {
+          "type": "integer",
+          "default": 25
+        },
+        "cuda_device": {
+          "type": "string",
+          "default": "cuda:all"
+        },
+        "basecaller_model_path": {
+          "type": "string"
+        },
+        "remora_model_path": {
+          "type": "string"
+        },
+        "basecaller_basemod_threads": {
+          "type": "integer",
+          "default": 2
+        },
+        "basecaller_args": {
+          "type": "string"
+        }
+      }
+    },
+    "multiprocessing_options": {
+      "title": "Multiprocessing Options",
+      "type": "object",
+      "description": "",
+      "default": "",
+      "properties": {
+        "ubam_map_threads": {
+          "type": "integer",
+          "default": 8
+        },
+        "ubam_sort_threads": {
+          "type": "integer",
+          "default": 3
+        },
+        "ubam_bam2fq_threads": {
+          "type": "integer",
+          "default": 1
+        },
+        "merge_threads": {
+          "type": "integer",
+          "default": 4
+        },
+        "stats_threads": {
+          "type": "integer",
+          "default": 4
+        }
+      }
+    },
+    "real_time_analysis_options": {
+      "title": "Real Time Analysis Options",
+      "type": "object",
+      "description": "",
+      "default": "",
+      "properties": {
+        "watch_path": {
+          "type": "boolean"
+        },
+        "read_limit": {
+          "type": "string"
+        }
+      }
+    },
+    "other_parameter": {
+      "title": "Other parameter",
+      "type": "object",
+      "description": "",
+      "default": "",
+      "properties": {
+        "aws_image_prefix": {
+          "type": "string"
+        },
+        "aws_queue": {
+          "type": "string"
+        },
+        "monochrome_logs": {
+          "type": "boolean",
+          "description": "Do not use coloured log outputs.",
+          "fa_icon": "fas fa-palette",
+          "hidden": true
+        },
+        "show_hidden_params": {
+          "type": "boolean"
+        },
+        "schema_ignore_params": {
+          "type": "string",
+          "default": "show_hidden_params,validate_params,monochrome_logs,aws_queue,aws_image_prefix,wf"
+        },
+        "experimental": {
+          "type": "boolean"
+        }
+      }
+    },
+    "bonito_basecaller": {
+      "title": "Bonito basecaller",
+      "type": "object",
+      "description": "",
+      "default": "",
+      "properties": {
+        "use_bonito": {
+          "type": "boolean"
+        },
+        "bonito_cfg": {
+          "type": "string",
+          "default": "dna_r10.4.1_e8.2_400bps_trns@v5.0.alpha"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "$ref": "#/definitions/input_output_options"
+    },
+    {
+      "$ref": "#/definitions/output_options"
+    },
+    {
+      "$ref": "#/definitions/max_job_request_options"
+    },
+    {
+      "$ref": "#/definitions/generic_options"
+    },
+    {
+      "$ref": "#/definitions/basecalling_options"
+    },
+    {
+      "$ref": "#/definitions/advanced_basecalling_options"
+    },
+    {
+      "$ref": "#/definitions/multiprocessing_options"
+    },
+    {
+      "$ref": "#/definitions/real_time_analysis_options"
+    },
+    {
+      "$ref": "#/definitions/other_parameter"
+    },
+    {
+      "$ref": "#/definitions/bonito_basecaller"
+    }
+  ]
+}
