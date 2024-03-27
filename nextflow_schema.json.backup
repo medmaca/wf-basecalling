@@ -14,18 +14,17 @@
       "properties": {
         "input": {
           "type": "string",
-          "format": "file-path",
+          "format": "path",
           "exists": true,
           "schema": "assets/schema_input.json",
           "mimetype": "text/csv",
-          "pattern": "^\\S+\\.csv$",
           "description": "Directory containing FAST5 (or POD5) signal for basecalling.",
-          "help_text": "Directory containing FAST5 (or POD5) signal for basecalling.",
+          "help_text": "This directory will be searched recursively. All FAST5 or POD5 files (depending on which extension you select in the Basecalling Options) in this directory or any subdirectory (no matter how deep) will be basecalled.",
           "fa_icon": "fas fa-file-csv"
         },
         "ref": {
           "type": "string",
-          "help_text": "Optional reference FASTA file to align basecalled reads to.",
+          "help_text": "Without a reference, basecalls are output to unaligned CRAM. When using a reference, take care to retain this FASTA file as the output CRAM file cannot be read without the reference it was aligned to.",
           "description": "Optional reference FASTA file to align basecalled reads to."
         }
       }
@@ -38,17 +37,224 @@
       "properties": {
         "out_dir": {
           "type": "string",
-          "default": "output"
+          "default": "output",
+          "description": "Directory for output of all files."
         },
         "sample_name": {
           "type": "string",
-          "default": "SAMPLE"
+          "default": "SAMPLE",
+          "description": "Sample name to prefix file names of workflow outputs."
         },
         "fastq_only": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Output unaligned FASTQ instead of unaligned CRAM"
         },
         "output_bam": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Output unaligned BAM instead of unaligned CRAM"
+        }
+      }
+    },
+    "basecalling_options": {
+      "title": "Basecalling options",
+      "type": "object",
+      "description": "",
+      "default": "",
+      "properties": {
+        "basecaller_cfg": {
+          "type": "string",
+          "description": "Name of the model to use for converting signal.",
+          "help_text": "Required for basecalling. The model list only shows models that are compatible with this workflow.",
+          "enum": [
+            "dna_r10.4.1_e8.2_260bps_fast@v4.1.0",
+            "dna_r10.4.1_e8.2_260bps_hac@v4.1.0",
+            "dna_r10.4.1_e8.2_260bps_sup@v4.1.0",
+            "dna_r10.4.1_e8.2_400bps_fast@v4.1.0",
+            "dna_r10.4.1_e8.2_400bps_fast@v4.2.0",
+            "dna_r10.4.1_e8.2_400bps_fast@v4.3.0",
+            "dna_r10.4.1_e8.2_400bps_hac@v4.1.0",
+            "dna_r10.4.1_e8.2_400bps_hac@v4.3.0",
+            "dna_r10.4.1_e8.2_400bps_sup@v4.1.0",
+            "dna_r10.4.1_e8.2_400bps_sup@v4.3.0",
+            "dna_r9.4.1_e8_fast@v3.4",
+            "dna_r9.4.1_e8_hac@v3.3",
+            "dna_r9.4.1_e8_sup@v3.3",
+            "dna_r9.4.1_e8_sup@v3.6",
+            "rna002_70bps_fast@v3",
+            "rna002_70bps_hac@v3",
+            "rna004_130bps_fast@v3.0.1",
+            "rna004_130bps_hac@v3.0.1",
+            "rna004_130bps_sup@v3.0.1"
+          ]
+        },
+        "duplex": {
+          "type": "boolean",
+          "description": "Run the basecaller in duplex mode.",
+          "help_text": "By default, the workflow conducts simplex basecalling. If you used a chemistry and flowcell combination that supported duplex reads, you should switch this option on. Currently, duplex basecalling is not compatible with modified basecalling. Additionally, duplex basecalling within this workflow is reliant on internal optimisations to organise input files for better duplex rates, which is not possible when using streaming basecalling; therefore duplex combined with the watch_path option could lead to lower duplex rates."
+        },
+        "remora_cfg": {
+          "type": "string",
+          "description": "Name of the model to use for calling modified bases.",
+          "help_text": "Required for calling modified bases while basecalling. The model list only shows models that are compatible with this workflow.",
+          "enum": [
+            "dna_r10.4.1_e8.2_260bps_fast@v4.1.0_5mCG_5hmCG@v2",
+            "dna_r10.4.1_e8.2_260bps_hac@v4.1.0_5mCG_5hmCG@v2",
+            "dna_r10.4.1_e8.2_260bps_sup@v4.1.0_5mCG_5hmCG@v2",
+            "dna_r10.4.1_e8.2_400bps_fast@v4.1.0_5mCG_5hmCG@v2",
+            "dna_r10.4.1_e8.2_400bps_fast@v4.2.0_5mCG_5hmCG@v2",
+            "dna_r10.4.1_e8.2_400bps_hac@v4.1.0_5mCG_5hmCG@v2",
+            "dna_r10.4.1_e8.2_400bps_hac@v4.3.0_5mCG_5hmCG@v1",
+            "dna_r10.4.1_e8.2_400bps_hac@v4.3.0_5mC_5hmC@v1",
+            "dna_r10.4.1_e8.2_400bps_hac@v4.3.0_6mA@v2",
+            "dna_r10.4.1_e8.2_400bps_sup@v4.1.0_5mCG_5hmCG@v2",
+            "dna_r10.4.1_e8.2_400bps_sup@v4.3.0_5mCG_5hmCG@v1",
+            "dna_r10.4.1_e8.2_400bps_sup@v4.3.0_5mC_5hmC@v1",
+            "dna_r10.4.1_e8.2_400bps_sup@v4.3.0_6mA@v2",
+            "dna_r9.4.1_e8_fast@v3.4_5mCG@v0.1",
+            "dna_r9.4.1_e8_fast@v3.4_5mCG_5hmCG@v0",
+            "dna_r9.4.1_e8_hac@v3.3_5mCG@v0.1",
+            "dna_r9.4.1_e8_hac@v3.3_5mCG_5hmCG@v0",
+            "dna_r9.4.1_e8_sup@v3.3_5mCG@v0.1",
+            "dna_r9.4.1_e8_sup@v3.3_5mCG_5hmCG@v0",
+            "rna004_130bps_sup@v3.0.1_m6A_DRACH@v1"
+          ]
+        },
+        "dorado_ext": {
+          "type": "string",
+          "default": "pod5",
+          "description": "File extension for Dorado inputs.",
+          "help_text": "Set this to fast5 if you have not converted your fast5 to pod5. It is recommended to [convert existing fast5 files to pod5 for use with Dorado](https://github.com/nanoporetech/pod5-file-format/blob/master/python/README.md#pod5-convert-from-fast5)."
+        }
+      }
+    },
+    "advanced_basecalling_options": {
+      "title": "Advanced basecalling options",
+      "type": "object",
+      "description": "",
+      "default": "",
+      "properties": {
+        "output_pod5": {
+          "type": "boolean",
+          "help_text": "Dorado duplex only supports POD5 input. The workflow will automatically convert FAST5 input to POD5 when duplex calling. By default, converted POD5 are deleted to save disk space. Enabling this option will make the workflow output converted POD5 files to a subfolder within the output directory.",
+          "description": "Save the converted POD5 when running in duplex with FAST5 inputs."
+        },
+        "qscore_filter": {
+          "type": "integer",
+          "default": 10,
+          "description": "Mean qscore by which to filter reads. Inclusive such that reads with score >= qscore_filter are kept.",
+          "help_text": "The mean qscore of reads is calculated by dorado and rounded to an integer by dorado and stored as a tag in dorado's SAM output. The pipeline separates reads into pass and fail categories based on this SAM tag."
+        },
+        "basecaller_chunk_size": {
+          "type": "integer",
+          "default": 25,
+          "description": "Number of input files to basecall in each basecalling process."
+        },
+        "cuda_device": {
+          "type": "string",
+          "default": "cuda:all",
+          "description": "GPU device to use for basecalling [cuda:all].",
+          "help_text": "For local execution this can be used to pin GPU tasks to one (or more) specific GPU devices. Use cuda:all to use all available GPU devices, or cuda:idx[,idx,...] where idx is an index number(s) of GPU device(s) to use."
+        },
+        "basecaller_model_path": {
+          "type": "string",
+          "description": "Override the named basecalling model with a custom basecalling model.",
+          "help_text": "For typical use, users should set --basecaller_cfg which will use a named model from inside the container. Experimental or custom basecallers will not be available in the container and can be loaded from the host with --basecaller_model_path."
+        },
+        "remora_model_path": {
+          "type": "string",
+          "description": "Override the named remora model with a custom remora model.",
+          "help_text": "For typical use, users should set --remora_cfg which will use a named model from inside the container. Experimental or custom models will not be available in the container and can be loaded from the host with --remora_model_path."
+        },
+        "basecaller_basemod_threads": {
+          "type": "integer",
+          "default": 2,
+          "description": "Number of threads to use for base modification calling.",
+          "help_text": "You must set this to > 0 when using a modbase aware model. Modbase calling does not require much additional CPU and should be set carefully when using GPU servers with a small number of CPUs per GPU."
+        },
+        "basecaller_args": {
+          "type": "string",
+          "description": "Additional command line arguments to pass to the basecaller process."
+        },
+        "experimental": {
+          "type": "boolean",
+          "description": "Enable experimental and unsupported features.",
+          "help_text": "Use of this option is required to enable hidden, experimental features. No ordinary user should need to enable this option unless instructed to do so by a member of the EPI2ME team."
+        }
+      }
+    },
+    "bonito_basecaller": {
+      "title": "Bonito basecaller",
+      "type": "object",
+      "description": "",
+      "default": "",
+      "properties": {
+        "use_bonito": {
+          "type": "boolean",
+          "description": "Use bonito rather than dorado for basecalling. Highly experimental, many options will not work when this is enabled.",
+          "help_text": "This experimental option is not recommended for normal use and is not supported."
+        },
+        "bonito_cfg": {
+          "type": "string",
+          "description": "Name of the model to use for converting signal.",
+          "help_text": "Required for basecalling. The model list only shows models that are compatible with this workflow.",
+          "enum": [
+            "dna_r10.4.1_e8.2_260bps_5b4_dU_trns@v5.0.alpha",
+            "dna_r10.4.1_e8.2_260bps_trns@v5.0.alpha",
+            "dna_r10.4.1_e8.2_400bps_5b4_dU_trns@v5.0.alpha",
+            "dna_r10.4.1_e8.2_400bps_trns@v5.0.alpha"
+          ],
+          "default": "dna_r10.4.1_e8.2_400bps_trns@v5.0.alpha"
+        }
+      }
+    },
+    "multiprocessing_options": {
+      "title": "Multiprocessing Options",
+      "type": "object",
+      "description": "",
+      "default": "",
+      "properties": {
+        "ubam_map_threads": {
+          "type": "integer",
+          "default": 8,
+          "description": "Set max number of threads to use for aligning reads from uBAM (limited by config executor cpus)"
+        },
+        "ubam_sort_threads": {
+          "type": "integer",
+          "default": 3,
+          "description": "Set max number of threads to use for sorting and indexing aligned reads from uBAM (limited by config executor cpus)"
+        },
+        "ubam_bam2fq_threads": {
+          "type": "integer",
+          "default": 1,
+          "description": "Set max number of threads to use for uncompressing uBAM and generating FASTQ for alignment (limited by config executor cpus)"
+        },
+        "merge_threads": {
+          "type": "integer",
+          "default": 4,
+          "description": "Set max number of threads to use for merging BAM files (limited by config executor cpus)"
+        },
+        "stats_threads": {
+          "type": "integer",
+          "default": 4,
+          "description": "Set max number of threads to use for getting stats from output files. (limited by config executor cpus)"
+        }
+      }
+    },
+    "real_time_analysis_options": {
+      "title": "Real Time Analysis Options",
+      "type": "object",
+      "description": "",
+      "default": "",
+      "properties": {
+        "watch_path": {
+          "type": "boolean",
+          "description": "Enable to continuously watch the input directory for new input files. Reads will be analysed as they appear.",
+          "help_text": "This option enables the use of Nextflow's directory watching feature to constantly monitor input directories for new files. As soon as files are written by an external process Nextflow will begin analysing these files. The workflow will accumulate data over time to produce an updating report. Real time analysis of duplex data may lead to lower duplex rates than what would have been obtained by running basecalling after sequencing."
+        },
+        "read_limit": {
+          "type": "string",
+          "description": "Stop processing data when a particular number of reads have been analysed.",
+          "help_text": "By default the workflow will run indefinitely when using the real time watch path option. This will set the upper bound on the number of reads that will be analysed before the workflow is automatically stopped and no more data is analysed."
         }
       }
     },
@@ -106,114 +312,9 @@
           "fa_icon": "fas fa-question-circle",
           "hidden": true
         },
-        "validate_params": {
-          "type": "boolean",
-          "description": "Boolean whether to validate parameters against the schema at runtime",
-          "default": true,
-          "fa_icon": "fas fa-check-square",
-          "hidden": true
-        },
         "disable_ping": {
-          "type": "boolean"
-        }
-      }
-    },
-    "basecalling_options": {
-      "title": "Basecalling options",
-      "type": "object",
-      "description": "",
-      "default": "",
-      "properties": {
-        "basecaller_cfg": {
-          "type": "string"
-        },
-        "duplex": {
-          "type": "boolean"
-        },
-        "remora_cfg": {
-          "type": "string"
-        },
-        "dorado_ext": {
-          "type": "string",
-          "default": "pod5"
-        }
-      }
-    },
-    "advanced_basecalling_options": {
-      "title": "Advanced basecalling options",
-      "type": "object",
-      "description": "",
-      "default": "",
-      "properties": {
-        "output_pod5": {
-          "type": "boolean"
-        },
-        "qscore_filter": {
-          "type": "integer",
-          "default": 10
-        },
-        "basecaller_chunk_size": {
-          "type": "integer",
-          "default": 25
-        },
-        "cuda_device": {
-          "type": "string",
-          "default": "cuda:all"
-        },
-        "basecaller_model_path": {
-          "type": "string"
-        },
-        "remora_model_path": {
-          "type": "string"
-        },
-        "basecaller_basemod_threads": {
-          "type": "integer",
-          "default": 2
-        },
-        "basecaller_args": {
-          "type": "string"
-        }
-      }
-    },
-    "multiprocessing_options": {
-      "title": "Multiprocessing Options",
-      "type": "object",
-      "description": "",
-      "default": "",
-      "properties": {
-        "ubam_map_threads": {
-          "type": "integer",
-          "default": 8
-        },
-        "ubam_sort_threads": {
-          "type": "integer",
-          "default": 3
-        },
-        "ubam_bam2fq_threads": {
-          "type": "integer",
-          "default": 1
-        },
-        "merge_threads": {
-          "type": "integer",
-          "default": 4
-        },
-        "stats_threads": {
-          "type": "integer",
-          "default": 4
-        }
-      }
-    },
-    "real_time_analysis_options": {
-      "title": "Real Time Analysis Options",
-      "type": "object",
-      "description": "",
-      "default": "",
-      "properties": {
-        "watch_path": {
-          "type": "boolean"
-        },
-        "read_limit": {
-          "type": "string"
+          "type": "boolean",
+          "description": "Disable workflow ping."
         }
       }
     },
@@ -224,15 +325,24 @@
       "default": "",
       "properties": {
         "aws_image_prefix": {
-          "type": "string"
+          "type": "string",
+          "hidden": true
         },
         "aws_queue": {
-          "type": "string"
+          "type": "string",
+          "hidden": true
         },
         "monochrome_logs": {
           "type": "boolean",
           "description": "Do not use coloured log outputs.",
           "fa_icon": "fas fa-palette",
+          "hidden": true
+        },
+        "validate_params": {
+          "type": "boolean",
+          "description": "Boolean whether to validate parameters against the schema at runtime",
+          "default": true,
+          "fa_icon": "fas fa-check-square",
           "hidden": true
         },
         "show_hidden_params": {
@@ -241,24 +351,6 @@
         "schema_ignore_params": {
           "type": "string",
           "default": "show_hidden_params,validate_params,monochrome_logs,aws_queue,aws_image_prefix,wf"
-        },
-        "experimental": {
-          "type": "boolean"
-        }
-      }
-    },
-    "bonito_basecaller": {
-      "title": "Bonito basecaller",
-      "type": "object",
-      "description": "",
-      "default": "",
-      "properties": {
-        "use_bonito": {
-          "type": "boolean"
-        },
-        "bonito_cfg": {
-          "type": "string",
-          "default": "dna_r10.4.1_e8.2_400bps_trns@v5.0.alpha"
         }
       }
     }
@@ -271,16 +363,13 @@
       "$ref": "#/definitions/output_options"
     },
     {
-      "$ref": "#/definitions/max_job_request_options"
-    },
-    {
-      "$ref": "#/definitions/generic_options"
-    },
-    {
       "$ref": "#/definitions/basecalling_options"
     },
     {
       "$ref": "#/definitions/advanced_basecalling_options"
+    },
+    {
+      "$ref": "#/definitions/bonito_basecaller"
     },
     {
       "$ref": "#/definitions/multiprocessing_options"
@@ -289,10 +378,13 @@
       "$ref": "#/definitions/real_time_analysis_options"
     },
     {
-      "$ref": "#/definitions/other_parameter"
+      "$ref": "#/definitions/max_job_request_options"
     },
     {
-      "$ref": "#/definitions/bonito_basecaller"
+      "$ref": "#/definitions/generic_options"
+    },
+    {
+      "$ref": "#/definitions/other_parameter"
     }
   ]
 }
