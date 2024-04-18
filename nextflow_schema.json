@@ -10,7 +10,7 @@
       "type": "object",
       "fa_icon": "fas fa-terminal",
       "description": "Define where the pipeline should find input data and save output data.",
-      "required": ["input"],
+      "required": ["input", "out_dir"],
       "properties": {
         "input": {
           "type": "string",
@@ -21,6 +21,10 @@
           "description": "Directory containing FAST5 (or POD5) signal for basecalling.",
           "help_text": "This directory will be searched recursively. All FAST5 or POD5 files (depending on which extension you select in the Basecalling Options) in this directory or any subdirectory (no matter how deep) will be basecalled.",
           "fa_icon": "fas fa-file-csv"
+        },
+        "out_dir": {
+          "type": "string",
+          "description": "Directory for output of all files."
         },
         "ref": {
           "type": "string",
@@ -35,11 +39,6 @@
       "description": "",
       "default": "",
       "properties": {
-        "out_dir": {
-          "type": "string",
-          "default": "output",
-          "description": "Directory for output of all files."
-        },
         "sample_name": {
           "type": "string",
           "default": "SAMPLE",
