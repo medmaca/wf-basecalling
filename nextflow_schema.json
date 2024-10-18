@@ -31,7 +31,6 @@
       "properties": {
         "out_dir": {
           "type": "string",
-          "default": "output",
           "description": "Output directory",
           "help_text": "Directory for output of all files."
         },
@@ -230,13 +229,13 @@
         },
         "qscore_filter": {
           "type": "number",
-          "default": 10,
+          "default": 10.0,
           "description": "Mean qscore by which to filter reads. Inclusive such that reads with score >= qscore_filter are kept.",
           "help_text": "The mean qscore of reads is calculated by dorado and rounded to an integer by dorado and stored as a tag in dorado's SAM output. The pipeline separates reads into pass and fail categories based on this SAM tag."
         },
         "basecaller_chunk_size": {
           "type": "number",
-          "default": 25,
+          "default": 25.0,
           "description": "Number of input files to basecall in each basecalling process.",
           "minimum": 1
         },
@@ -258,7 +257,7 @@
         },
         "basecaller_basemod_threads": {
           "type": "number",
-          "default": 2,
+          "default": 2.0,
           "description": "Number of threads to use for base modification calling.",
           "help_text": "You must set this to > 0 when using a modbase aware model. Modbase calling does not require much additional CPU and should be set carefully when using GPU servers with a small number of CPUs per GPU."
         },
